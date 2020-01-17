@@ -1,10 +1,10 @@
 import * as actionTypes from "./actionTypes";
 import axios from "axios";
 
-const FIRE_BASE_API_KEY =
+const { FIREBASE_API_KEY } =
   process.env.NODE_ENV == "production"
-    ? process.env.FIREBASE_API_KEY
-    : require("../../secrets.json").FIREBASE_API_KEY;
+    ? process.env
+    : require("../../secrets.json");
 
 export const authStart = () => {
   return {
@@ -52,9 +52,9 @@ export const auth = (email, password, isSignUp) => {
       password,
       returnSecureToken: true
     };
-    let url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIRE_BASE_API_KEY}`;
+    let url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`;
     if (!isSignUp) {
-      url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIRE_BASE_API_KEY}`;
+      url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`;
     }
     axios
       .post(url, authData)
