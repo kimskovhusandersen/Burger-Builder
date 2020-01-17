@@ -6,6 +6,8 @@ const { FIREBASE_API_KEY } =
     ? process.env
     : require("../../secrets.json");
 
+console.log(process.env);
+
 export const authStart = () => {
   return {
     type: actionTypes.AUTH_START
