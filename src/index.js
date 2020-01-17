@@ -22,9 +22,9 @@ const combinedReducer = combineReducers({
 console.log(process.env);
 
 const composeEnhancers =
-  process.env.NODE_ENV == "production"
-    ? null
-    : window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  process.env.NODE_ENV !== "production"
+    ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+    : null || compose;
 
 const store = createStore(
   combinedReducer,
