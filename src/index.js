@@ -11,15 +11,18 @@ import { BrowserRouter } from "react-router-dom";
 
 import burgerBuilderReducer from "./store/reducer/burgerBuilder";
 import orderReducer from "./store/reducer/order";
+import authReducer from "./store/reducer/auth";
 
 const combinedReducer = combineReducers({
   burgerBuilderReducer,
-  orderReducer
+  orderReducer,
+  authReducer
 });
-// import axios from "axios";
-// axios.defaults.baseURL = "https://burgerbuilder-a1cd3.firebaseio.com/";
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers =
+  process.env.NODE_ENV === "development"
+    ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+    : null || compose;
 
 const store = createStore(
   combinedReducer,
@@ -36,7 +39,4 @@ const app = (
 
 ReactDOM.render(app, document.getElementById("root"));
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();

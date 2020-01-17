@@ -7,7 +7,7 @@ import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import WithErrorHandler from "../../hoc/Layout/withErrorHandler/withErrorHandler";
 import axios from "../../axios-order";
-import * as actionCreators from "../../store/actions/index";
+import * as actions from "../../store/actions/index";
 
 class BurgerBuilder extends Component {
   state = {
@@ -32,7 +32,12 @@ class BurgerBuilder extends Component {
   }
 
   purchaseHandler = () => {
-    this.setState({ purchasing: true });
+    if (this.props.isAuthenticated) {
+      this.setState({ purchasing: true });
+    } else {
+      this.props.onSetAuthRedirectPath("/checkout");
+      this.props.history.push("/auth");
+    }
   };
 
   purchaseCancelHandler = () => {
@@ -69,6 +74,7 @@ class BurgerBuilder extends Component {
             price={this.props.totalPrice}
             purchasable={this.updatePurchaseState()}
             ordered={this.purchaseHandler}
+            isAuthenticated={this.props.isAuthenticated}
           />
         </>
       );
@@ -101,17 +107,18 @@ const mapStateToProps = state => {
   return {
     ingredients: state.burgerBuilderReducer.ingredients,
     totalPrice: state.burgerBuilderReducer.totalPrice,
-    error: state.burgerBuilderReducer.error
+    error: state.burgerBuilderReducer.error,
+    isAuthenticated: state.authReducer.token !== null
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAddIngredients: igType => dispatch(actionCreators.addIngredient(igType)),
-    onRemoveIngredients: igType =>
-      dispatch(actionCreators.removeIngredient(igType)),
-    onInitIngredients: () => dispatch(actionCreators.initIngredients()),
-    onInitPurchase: () => dispatch(actionCreators.purchaseInit())
+    onAddIngredients: igType => dispatch(actions.addIngredient(igType)),
+    onRemoveIngredients: igType => dispatch(actions.removeIngredient(igType)),
+    onInitIngredients: () => dispatch(actions.initIngredients()),
+    onInitPurchase: () => dispatch(actions.purchaseInit()),
+    onSetAuthRedirectPath: path => dispatch(actions.setAuthRedirectPath(path))
   };
 };
 

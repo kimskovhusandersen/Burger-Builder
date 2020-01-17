@@ -7,6 +7,7 @@ import Input from "../../../components/UI/Input/Input";
 import withErrorHandler from "../../../hoc/Layout/withErrorHandler/withErrorHandler";
 import classes from "./ContactData.module.css";
 import * as actionCreators from "../../../store/actions/index";
+import { updateObject, checkValidity } from "../../../shared/utility";
 
 class ContactData extends Component {
   state = {
@@ -110,24 +111,24 @@ class ContactData extends Component {
     const order = {
       ingredients: this.props.ingredients,
       price: this.props.totalPrice, // make sure to calculate on the backend to ensure that user isn't manipulating it
-      orderData: formData
+      orderData: formData,
+      userId: this.props.userId
     };
-    this.props.onOrderBurger(order);
+    this.props.onOrderBurger(order, this.props.token);
   };
 
   inputChangeHandler = (event, name) => {
-    const updatedOrderForm = {
-      ...this.state.orderForm,
-      [name]: {
-        ...this.state.orderForm[name],
-        value: event.target.value,
-        valid: this.checkValidity(
-          event.target.value,
-          this.state.orderForm[name].validation
-        ),
-        touched: true
-      }
-    };
+    const updatedFormElement = updateObject(this.state.orderForm[name], {
+      value: event.target.value,
+      valid: checkValidity(
+        event.target.value,
+        this.state.orderForm[name].validation
+      ),
+      touched: true
+    });
+    const updatedOrderForm = updateObject(this.state.orderForm, {
+      [name]: updatedFormElement
+    });
     let formIsValid = true;
     for (let key in updatedOrderForm) {
       formIsValid = updatedOrderForm[key].valid && formIsValid;
@@ -135,24 +136,6 @@ class ContactData extends Component {
 
     this.setState({ orderForm: updatedOrderForm, formIsValid });
   };
-
-  checkValidity(value, rules) {
-    let isValid = true;
-    if (!rules) {
-      return isValid;
-    }
-    if (rules.required) {
-      isValid = value.trim() !== "" && isValid;
-    }
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-    console.log(isValid);
-    return isValid;
-  }
 
   render() {
     const formElementsArray = Object.keys(this.state.orderForm).map(key => ({
@@ -196,13 +179,16 @@ const mapStateToProps = state => {
   return {
     ingredients: state.burgerBuilderReducer.ingredients,
     totalPrice: state.burgerBuilderReducer.totalPrice,
-    loading: state.orderReducer.loading
+    loading: state.orderReducer.loading,
+    token: state.authReducer.token,
+    userId: state.authReducer.userId
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onOrderBurger: order => dispatch(actionCreators.purchaseBurger(order))
+    onOrderBurger: (order, token) =>
+      dispatch(actionCreators.purchaseBurger(order, token))
   };
 };
 

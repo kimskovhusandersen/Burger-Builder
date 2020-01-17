@@ -1,33 +1,68 @@
 import React, { Component } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+import * as actions from "./store/actions";
 import Layout from "./hoc/Layout/Layout";
 import BurgerBuilder from "./containers/BurgerBuilder/BurgerBuilder";
-import Checkout from "./containers/Checkout/Checkout";
-import Orders from "./containers/Orders/Orders";
-import Auth from "./containers/Auth/Auth";
+
+import asyncComponent from "./hoc/asyncComponent/asyncComponent";
+
+const asyncCheckout = asyncComponent(() => {
+  return import("./containers/Checkout/Checkout");
+});
+const asyncOrder = asyncComponent(() => {
+  return import("./containers/Orders/Orders");
+});
+const asyncAuth = asyncComponent(() => {
+  return import("./containers/Auth/Auth");
+});
+const asyncLogout = asyncComponent(() => {
+  return import("./containers/Auth/Logout/Logout");
+});
 
 class App extends Component {
-  // state = { show: true };
-  //
-  // componentDidMount() {
-  //   console.log("[App.js] componentDidMount");
-  //   setTimeout(() => {
-  //     this.setState({ show: false });
-  //   }, 5000);
-  // }
+  componentDidMount() {
+    this.props.onTryAuthenticate();
+  }
 
   render() {
-    return (
-      <Layout>
-        <Switch>
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/orders" component={Orders} />
-          <Route exact path="/" component={BurgerBuilder} />
-          <Route exact path="/auth" component={Auth} />
-        </Switch>
-      </Layout>
+    let routes = (
+      <Switch>
+        <Route exact path="/" component={BurgerBuilder} />
+        <Route path="/auth" component={asyncAuth} />
+        <Redirect to="/" />
+      </Switch>
     );
+    if (this.props.isAuthenticated) {
+      routes = (
+        <Switch>
+          <Route exact path="/" component={BurgerBuilder} />
+          <Route path="/checkout" component={asyncCheckout} />
+          <Route path="/orders" component={asyncOrder} />
+          <Route path="/logout" component={asyncLogout} />
+          <Route path="/auth" component={asyncAuth} />
+          <Redirect to="/" />
+        </Switch>
+      );
+    }
+
+    return <Layout>{routes}</Layout>;
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    isAuthenticated: state.authReducer.token !== null
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onTryAuthenticate: () => dispatch(actions.authCheckState())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
