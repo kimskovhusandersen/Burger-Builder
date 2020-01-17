@@ -1,12 +1,11 @@
 import * as actionTypes from "./actionTypes";
 import axios from "axios";
+console.log(process.env);
 
 const { FIREBASE_API_KEY } =
   process.env.NODE_ENV == "production"
     ? process.env
     : require("../../secrets.json");
-
-console.log(process.env);
 
 export const authStart = () => {
   return {
