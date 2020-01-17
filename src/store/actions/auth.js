@@ -1,6 +1,11 @@
 import * as actionTypes from "./actionTypes";
 import axios from "axios";
-import secrets from "../../secrets.json";
+
+if (process.env.NODE_ENV == "production") {
+  const secrets = process.env;
+} else {
+  import secrets from "../../secrets.json";
+}
 
 export const authStart = () => {
   return {
